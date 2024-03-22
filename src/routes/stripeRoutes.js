@@ -1,13 +1,12 @@
 const express = require("express");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Importa el objeto stripe
-
-// Creating a router instance
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
 
-// Importing the fetchTickets function from the stripeController module
+// Middleware para parsear el cuerpo de la solicitud como JSON
+router.use(express.json());
+
 const { fetchTickets } = require("../controllers/stripeController");
 
-// Handling GET requests to the '/tickets' endpoint
 router.get("/tickets", async (req, res) => {
   try {
     const ticketsList = await fetchTickets();
@@ -17,7 +16,6 @@ router.get("/tickets", async (req, res) => {
   }
 });
 
-// Post a new Registration
 router.post("/create-checkout-session", async (req, res) => {
   const { tickets } = req.body;
   try {
@@ -28,12 +26,13 @@ router.post("/create-checkout-session", async (req, res) => {
           currency: ticket.currency,
           product_data: {
             name: ticket.name,
-            description: ticket.description,
+            description: ticket.description || "No description available",
           },
           unit_amount: ticket.price * 100, // El precio se debe pasar en centavos
         },
-        quantity: 1,
+        quantity: ticket.quantity,
       })),
+
       mode: "payment",
       success_url: "https://localhost:4321/success",
       cancel_url: "https://localhost:4321/cancel",
