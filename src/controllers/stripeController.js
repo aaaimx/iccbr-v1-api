@@ -13,14 +13,14 @@ async function fetchAll(resource, params) {
   }
 }
 
-// Function to fetch catalog data (products and prices) from Stripe
-async function fetchCatalog() {
+// Function to fetch ticketsList data (products and prices) from Stripe
+async function fetchTickets() {
   try {
-    const products = await fetchAll(stripe.products, { active: true });
+    const tickets = await fetchAll(stripe.products, { active: true });
     const prices = await fetchAll(stripe.prices, { active: true });
 
-    // Mapping products to create a catalog array with desired fields
-    const catalog = products.map((product) => {
+    // Mapping products to create a ticketsList array with desired fields
+    const ticketsList = tickets.map((product) => {
       // Filtering prices to find the one associated with the current product
       const productPrices = prices.filter(
         (price) => price.product === product.id
@@ -40,12 +40,12 @@ async function fetchCatalog() {
       };
     });
 
-    // Returning the constructed catalog array
-    return catalog;
+    // Returning the constructed ticketsList array
+    return ticketsList;
   } catch (error) {
-    console.error("Error fetching catalog:", error);
-    throw new Error("Error fetching catalog");
+    console.error("Error fetching ticketsList:", error);
+    throw new Error("Error fetching ticketsList");
   }
 }
 
-module.exports = { fetchCatalog };
+module.exports = { fetchTickets };

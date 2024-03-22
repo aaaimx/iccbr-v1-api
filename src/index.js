@@ -8,7 +8,7 @@ const routes = require("./routes/stripeRoutes");
 // Enable CORS for all requests
 app.use(
   cors({
-    origin: "http://localhost:4321",
+    origin: process.env.ALLOWED_ORIGIN || "http://localhost:4321",
   })
 );
 
