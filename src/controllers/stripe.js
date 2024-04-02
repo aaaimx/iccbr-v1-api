@@ -53,7 +53,7 @@ const pool = require("../config/database.js");
 
 // Function to handle successful payment and save user data to database
 async function handleSuccessfulPayment(formData) {
-  console.log("Form Data:", formData);
+  // console.log("formData from handleSuccessfulPayment():", formData);
   try {
     // Extract user information from formData
     const {
@@ -90,11 +90,9 @@ async function handleSuccessfulPayment(formData) {
 
     await pool.query(query, values);
 
-    // You can also perform other actions here, such as updating inventory, sending emails, etc.
-
-    console.log("User information saved successfully to the database.");
+    console.log("✅ User information saved successfully to the database.");
   } catch (error) {
-    console.error("Error saving user information to the database:", error);
+    console.error("❌ Error saving user information to the database:", error);
     throw new Error("Error saving user information to the database");
   }
 }

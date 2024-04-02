@@ -4,15 +4,15 @@ const endpointSecret = process.env.STRIPE_SECRET_ENDPOINT;
 const bodyParser = require("body-parser");
 const router = express.Router();
 
-// Middleware para parsear el cuerpo de la solicitud como JSON
-const jsonParser = bodyParser.json();
-
 const {
   fetchTickets,
   handleSuccessfulPayment,
 } = require("../controllers/stripe");
 
-// Middleware para parsear el cuerpo de la solicitud solo para rutas específicas
+// Middleware to parse request body as JSON
+const jsonParser = bodyParser.json();
+
+// Middleware to parse request body only for specific routes
 router.use("/create-checkout-session", jsonParser);
 
 // Get all tickets
@@ -28,7 +28,7 @@ router.get("/tickets", async (req, res) => {
 // Create a new checkout session
 router.post("/create-checkout-session", async (req, res) => {
   const { tickets, formData } = req.body; // Tickets and customers data
-  console.log("formData of /create-checkout-session", formData);
+  // console.log("formData of /create-checkout-session", formData);
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -48,6 +48,7 @@ router.post("/create-checkout-session", async (req, res) => {
       mode: "payment",
       success_url: "http://localhost:4321/success",
       cancel_url: "http://localhost:4321/cancel",
+      metadata: formData,
     });
 
     res.json({ url: session.url, sessionId: session.id, formData });
@@ -57,13 +58,13 @@ router.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-// Wenhook listener
+// Webhook listener
 router.post(
   "/webhook",
   express.raw({ type: "application/json" }),
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
-  
+
     let event;
 
     try {
@@ -77,16 +78,26 @@ router.post(
     if (event.type === "checkout.session.completed") {
       try {
         const session = event.data.object;
-        const customerEmail = session.customer_details.email;
-        const customerName = session.customer_details.name;
-        const customerAddress = session.customer_details.address;
-        // Aquí puedes acceder a más datos del cliente según sea necesario
+        const formData = session.metadata; // Access metadata
+        const {
+          email,
+          firstName,
+          lastName,
+          institution,
+          mobileNumber,
+          address,
+          country,
+        } = formData;
 
-        // Guardar la información del usuario en la base de datos
+        // Save user information to the database
         await handleSuccessfulPayment({
-          email: customerEmail,
-          name: customerName,
-          address: customerAddress,
+          email,
+          firstName,
+          lastName,
+          institution,
+          mobileNumber,
+          address,
+          country,
         });
       } catch (error) {
         console.error("Error saving user information to the database:", error);
