@@ -1,9 +1,10 @@
 require("dotenv").config();
 
 const express = require("express");
+const session = require("express-session");
 const cors = require("cors");
 const app = express();
-const routes = require("./routes/stripeRoutes");
+const stripe = require("./routes/stripe");
 
 // Enable CORS for all requests
 app.use(
@@ -12,7 +13,19 @@ app.use(
   })
 );
 
-app.use("/api", routes);
+// Configurar el middleware de sesión
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+// Stripe routes
+app.use("/api", stripe);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);

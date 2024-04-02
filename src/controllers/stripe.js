@@ -48,4 +48,47 @@ async function fetchTickets() {
   }
 }
 
-module.exports = { fetchTickets };
+// Importar la conexión a la base de datos
+const pool = require("../config/database.js");
+
+// Function to handle successful payment and save user data to database
+async function handleSuccessfulPayment(formData) {
+  console.log("Form Data:", formData);
+  try {
+    // Verificar que los campos requeridos no sean nulos
+    if (!formData.email || !formData.firstName) {
+      throw new Error("Missing required fields in formData");
+    }
+
+    // Insertar la información del usuario en la tabla "users" de la base de datos
+    const query = `
+      INSERT INTO users (email, first_name, last_name, institution, mobile_number, address, country)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT (email) DO UPDATE SET
+      first_name = excluded.first_name,
+      last_name = excluded.last_name,
+      institution = excluded.institution,
+      mobile_number = excluded.mobile_number,
+      address = excluded.address,
+      country = excluded.country
+    `;
+    const values = [
+      formData.email,
+      formData.firstName,
+      formData.lastName,
+      formData.institution,
+      formData.mobileNumber,
+      formData.address,
+      formData.country,
+    ];
+
+    await pool.query(query, values);
+
+    console.log("User information saved successfully to the database.");
+  } catch (error) {
+    console.error("Error saving user information to the database:", error);
+    throw new Error("Error saving user information to the database");
+  }
+}
+
+module.exports = { fetchTickets, handleSuccessfulPayment };
