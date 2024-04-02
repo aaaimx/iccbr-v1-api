@@ -4,16 +4,16 @@ const endpointSecret = process.env.STRIPE_SECRET_ENDPOINT;
 const bodyParser = require("body-parser");
 const router = express.Router();
 
-const {
-  fetchTickets,
-  handleSuccessfulPayment,
-} = require("../controllers/stripe");
-
 // Middleware to parse request body as JSON
 const jsonParser = bodyParser.json();
 
 // Middleware to parse request body only for specific routes
 router.use("/create-checkout-session", jsonParser);
+
+const {
+  fetchTickets,
+  handleSuccessfulPayment,
+} = require("../controllers/stripe");
 
 // Get all tickets
 router.get("/tickets", async (req, res) => {
@@ -79,6 +79,8 @@ router.post(
       try {
         const session = event.data.object;
         const formData = session.metadata; // Access metadata
+        // console.log("formData from /webhook ", formData);
+
         const {
           email,
           firstName,

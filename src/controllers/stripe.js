@@ -43,7 +43,7 @@ async function fetchTickets() {
     // Returning the constructed ticketsList array
     return ticketsList;
   } catch (error) {
-    console.error("Error fetching ticketsList:", error);
+    // console.error("Error fetching ticketsList:", error);
     throw new Error("Error fetching ticketsList");
   }
 }
@@ -53,7 +53,7 @@ const pool = require("../config/database.js");
 
 // Function to handle successful payment and save user data to database
 async function handleSuccessfulPayment(formData) {
-  // console.log("formData from handleSuccessfulPayment():", formData);
+  console.log("formData from handleSuccessfulPayment():", formData);
   try {
     // Extract user information from formData
     const {
