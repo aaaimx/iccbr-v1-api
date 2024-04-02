@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const stripe = require("./routes/stripe");
+const stripeRoutes = require("./routes/stripeRoutes");
 
 // Enable CORS for all requests
 app.use(
@@ -13,7 +13,7 @@ app.use(
 );
 
 // Stripe routes
-app.use("/api", stripe);
+app.use("/api", stripeRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>

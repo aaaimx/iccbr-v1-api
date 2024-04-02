@@ -1,6 +1,9 @@
-// Importing the Stripe package
+// Stripe packages
 const Stripe = require("stripe");
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Models
+const userModel = require("../models/usersModel.js");
 
 // Function to fetch all data from a Stripe resource with optional parameters
 async function fetchAll(resource, params) {
@@ -8,7 +11,7 @@ async function fetchAll(resource, params) {
     const data = await resource.list(params);
     return data.data;
   } catch (error) {
-    console.error("Error fetching data from Stripe:", error);
+    console.error("❌ Error fetching data from Stripe:", error);
     throw new Error("Error fetching data from Stripe");
   }
 }
@@ -48,52 +51,14 @@ async function fetchTickets() {
   }
 }
 
-// Importar la conexión a la base de datos
-const pool = require("../config/database.js");
-
-// Function to handle successful payment and save user data to database
+// Function to save user data only when successful payment
 async function handleSuccessfulPayment(formData) {
-  console.log("formData from handleSuccessfulPayment():", formData);
+  // console.log("formData from saveUser():", formData);
   try {
-    // Extract user information from formData
-    const {
-      email,
-      firstName,
-      lastName,
-      institution,
-      mobileNumber,
-      address,
-      country,
-    } = formData;
-
-    // Insert user information into "users" table
-    const query = `
-      INSERT INTO users (email, first_name, last_name, institution, mobile_number, address, country)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      ON CONFLICT (email) DO UPDATE SET
-      first_name = excluded.first_name,
-      last_name = excluded.last_name,
-      institution = excluded.institution,
-      mobile_number = excluded.mobile_number,
-      address = excluded.address,
-      country = excluded.country
-    `;
-    const values = [
-      email,
-      firstName,
-      lastName,
-      institution,
-      mobileNumber,
-      address,
-      country,
-    ];
-
-    await pool.query(query, values);
-
-    console.log("✅ User information saved successfully to the database.");
+    await userModel.saveUser(formData);
   } catch (error) {
-    console.error("❌ Error saving user information to the database:", error);
-    throw new Error("Error saving user information to the database");
+    console.error("❌ Error saving user information:", error);
+    throw new Error("Error saving user information");
   }
 }
 

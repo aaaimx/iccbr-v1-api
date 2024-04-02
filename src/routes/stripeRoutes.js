@@ -13,7 +13,7 @@ router.use("/create-checkout-session", jsonParser);
 const {
   fetchTickets,
   handleSuccessfulPayment,
-} = require("../controllers/stripe");
+} = require("../controllers/stripeController");
 
 // Get all tickets
 router.get("/tickets", async (req, res) => {
@@ -29,6 +29,7 @@ router.get("/tickets", async (req, res) => {
 router.post("/create-checkout-session", async (req, res) => {
   const { tickets, formData } = req.body; // Tickets and customers data
   // console.log("formData of /create-checkout-session", formData);
+  console.log("✅ Checkout session created!");
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -80,6 +81,7 @@ router.post(
         const session = event.data.object;
         const formData = session.metadata; // Access metadata
         // console.log("formData from /webhook ", formData);
+        console.log("✅ Checkout session completed!");
 
         const {
           email,
@@ -102,8 +104,11 @@ router.post(
           country,
         });
       } catch (error) {
-        console.error("Error saving user information to the database:", error);
-        res.status(500).send("Error handling successful payment");
+        console.error(
+          "❌ Error saving user information to the database:",
+          error
+        );
+        res.status(500).send("❌ Error handling successful payment");
         return;
       }
     }
