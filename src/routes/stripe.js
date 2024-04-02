@@ -1,8 +1,6 @@
 const express = require("express");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const { v4: uuidv4 } = require("uuid");
-const endpointSecret =
-  "whsec_13ecb0b7c76b9f94f992bb6391eacb9726e76f8f1090884681bfa7aa432a6fbd";
+const endpointSecret = process.env.STRIPE_SECRET_ENDPOINT;
 const bodyParser = require("body-parser");
 const router = express.Router();
 
@@ -30,15 +28,7 @@ router.get("/tickets", async (req, res) => {
 // Create a new checkout session
 router.post("/create-checkout-session", async (req, res) => {
   const { tickets, formData } = req.body; // Tickets and customers data
-
-  // Genera un identificador único para la transacción
-  const transactionId = uuidv4();
-
-  // Almacena temporalmente los datos del formulario junto con el identificador único
-  req.session.formData = {
-    transactionId,
-    ...formData,
-  };
+  console.log("formData of /create-checkout-session", formData);
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -60,7 +50,7 @@ router.post("/create-checkout-session", async (req, res) => {
       cancel_url: "http://localhost:4321/cancel",
     });
 
-    res.json({ url: session.url, sessionId: session.id });
+    res.json({ url: session.url, sessionId: session.id, formData });
   } catch (error) {
     console.error("Error creating checkout session:", error);
     res.status(500).json({ error: "Error creating checkout session" });
@@ -73,7 +63,7 @@ router.post(
   express.raw({ type: "application/json" }),
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
-
+  
     let event;
 
     try {
@@ -83,28 +73,29 @@ router.post(
       return;
     }
 
-    // Verificar si el evento es de tipo "checkout.session.completed"
+    // Handle the event
     if (event.type === "checkout.session.completed") {
       try {
-        // Obtener el objeto de pago de la sesión de checkout
-        const paymentIntent = event.data.object;
-
-        // Obtener el identificador único de la transacción
-        const transactionId = paymentIntent.client_reference_id;
-
-        // Recuperar los datos del formulario utilizando el identificador único
-        const formData = req.session.formData;
+        const session = event.data.object;
+        const customerEmail = session.customer_details.email;
+        const customerName = session.customer_details.name;
+        const customerAddress = session.customer_details.address;
+        // Aquí puedes acceder a más datos del cliente según sea necesario
 
         // Guardar la información del usuario en la base de datos
-        await handleSuccessfulPayment(formData);
+        await handleSuccessfulPayment({
+          email: customerEmail,
+          name: customerName,
+          address: customerAddress,
+        });
       } catch (error) {
-        console.error("Error handling successful payment:", error);
+        console.error("Error saving user information to the database:", error);
         res.status(500).send("Error handling successful payment");
         return;
       }
     }
 
-    // Enviar una respuesta 200 para confirmar la recepción del evento
+    // Return a 200 response to acknowledge receipt of the event
     res.send();
   }
 );

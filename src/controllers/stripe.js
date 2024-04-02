@@ -55,12 +55,18 @@ const pool = require("../config/database.js");
 async function handleSuccessfulPayment(formData) {
   console.log("Form Data:", formData);
   try {
-    // Verificar que los campos requeridos no sean nulos
-    if (!formData.email || !formData.firstName) {
-      throw new Error("Missing required fields in formData");
-    }
+    // Extract user information from formData
+    const {
+      email,
+      firstName,
+      lastName,
+      institution,
+      mobileNumber,
+      address,
+      country,
+    } = formData;
 
-    // Insertar la información del usuario en la tabla "users" de la base de datos
+    // Insert user information into "users" table
     const query = `
       INSERT INTO users (email, first_name, last_name, institution, mobile_number, address, country)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -73,16 +79,18 @@ async function handleSuccessfulPayment(formData) {
       country = excluded.country
     `;
     const values = [
-      formData.email,
-      formData.firstName,
-      formData.lastName,
-      formData.institution,
-      formData.mobileNumber,
-      formData.address,
-      formData.country,
+      email,
+      firstName,
+      lastName,
+      institution,
+      mobileNumber,
+      address,
+      country,
     ];
 
     await pool.query(query, values);
+
+    // You can also perform other actions here, such as updating inventory, sending emails, etc.
 
     console.log("User information saved successfully to the database.");
   } catch (error) {

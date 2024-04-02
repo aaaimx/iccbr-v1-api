@@ -1,7 +1,6 @@
 require("dotenv").config();
 
 const express = require("express");
-const session = require("express-session");
 const cors = require("cors");
 const app = express();
 const stripe = require("./routes/stripe");
@@ -10,15 +9,6 @@ const stripe = require("./routes/stripe");
 app.use(
   cors({
     origin: process.env.ALLOWED_ORIGIN || "http://localhost:4321",
-  })
-);
-
-// Configurar el middleware de sesión
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
   })
 );
 
