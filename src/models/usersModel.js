@@ -1,4 +1,4 @@
-// Importar la conexión a la base de datos
+// Import the connection to the database
 const pool = require("../config/database.js");
 
 // Function to save user data
@@ -37,9 +37,10 @@ async function saveUser(formData) {
       country,
     ];
 
+    // Execute the SQL query with the provided values
     await pool.query(query, values);
 
-    console.log("✅ User information saved successfully.");
+    console.log("✅ User information saved successfully!");
   } catch (error) {
     console.error("❌ Error saving user information to the database:", error);
     throw new Error("Error saving user information to the database");

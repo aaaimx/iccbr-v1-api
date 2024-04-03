@@ -91,6 +91,7 @@ router.post(
           mobileNumber,
           address,
           country,
+          paymentMethod,
         } = formData;
 
         // Save user information to the database
@@ -102,6 +103,7 @@ router.post(
           mobileNumber,
           address,
           country,
+          paymentMethod,
         });
       } catch (error) {
         console.error(

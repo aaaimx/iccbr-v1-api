@@ -4,6 +4,7 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Models
 const userModel = require("../models/usersModel.js");
+const registrationsModel = require("../models/registrationsModel.js");
 
 // Function to fetch all data from a Stripe resource with optional parameters
 async function fetchAll(resource, params) {
@@ -55,7 +56,11 @@ async function fetchTickets() {
 async function handleSuccessfulPayment(formData) {
   // console.log("formData from saveUser():", formData);
   try {
+    // Save user information
     await userModel.saveUser(formData);
+
+    // Save registration information
+    await registrationsModel.saveRegistration(formData);
   } catch (error) {
     console.error("❌ Error saving user information:", error);
     throw new Error("Error saving user information");
