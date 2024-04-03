@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const stripeRoutes = require("./routes/stripeRoutes");
+const ticketsRoutes = require("./routes/ticketsRoutes");
 
 // Enable CORS for all requests
 app.use(
@@ -12,8 +13,9 @@ app.use(
   })
 );
 
-// Stripe routes
+// Routes
 app.use("/api", stripeRoutes);
+app.use("/api", ticketsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>

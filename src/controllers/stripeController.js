@@ -1,70 +1,83 @@
 // Stripe packages
-const Stripe = require("stripe");
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const endpointSecret = process.env.STRIPE_SECRET_ENDPOINT;
 
 // Models
 const userModel = require("../models/usersModel.js");
 const registrationsModel = require("../models/registrationsModel.js");
+const registrationTicketsModel = require("../models/registrationTicketsModel.js");
 
-// Function to fetch all data from a Stripe resource with optional parameters
-async function fetchAll(resource, params) {
+// Function to create a new checkout session
+async function createCheckoutSession(req, res) {
+  const { tickets, formData } = req.body;
+  console.log("formData of /create-checkout-session", formData);
+  // console.log("tickets of /create-checkout-session", tickets);
+  console.log("✅ Checkout session created!");
+
   try {
-    const data = await resource.list(params);
-    return data.data;
-  } catch (error) {
-    console.error("❌ Error fetching data from Stripe:", error);
-    throw new Error("Error fetching data from Stripe");
-  }
-}
-
-// Function to fetch ticketsList data (products and prices) from Stripe
-async function fetchTickets() {
-  try {
-    const tickets = await fetchAll(stripe.products, { active: true });
-    const prices = await fetchAll(stripe.prices, { active: true });
-
-    // Mapping products to create a ticketsList array with desired fields
-    const ticketsList = tickets.map((product) => {
-      // Filtering prices to find the one associated with the current product
-      const productPrices = prices.filter(
-        (price) => price.product === product.id
-      );
-
-      // Extracting price and currency information from the first price
-      const price = productPrices[0] ? productPrices[0].unit_amount / 100 : 0;
-      const currency = productPrices[0] ? productPrices[0].currency : "mxn";
-
-      // Constructing product object with required fields
-      return {
-        id: product.id,
-        name: product.name,
-        price: price,
-        currency: currency,
-        description: product.description || "",
-      };
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: tickets.map((ticket) => ({
+        price_data: {
+          currency: ticket.currency,
+          product_data: {
+            name: ticket.name,
+            description: ticket.description || "No description available",
+          },
+          unit_amount: ticket.price * 100,
+        },
+        quantity: ticket.quantity,
+      })),
+      mode: "payment",
+      success_url: "http://localhost:4321/success",
+      cancel_url: "http://localhost:4321/cancel",
+      metadata: formData,
+      /*metadata: {
+        formData: JSON.stringify(formData),
+        tickets: tickets.map((ticket) => ticket.id).join(","),
+      },*/
     });
 
-    // Returning the constructed ticketsList array
-    return ticketsList;
+    res.json({ url: session.url, sessionId: session.id, formData });
   } catch (error) {
-    // console.error("Error fetching ticketsList:", error);
-    throw new Error("Error fetching ticketsList");
+    console.error("Error creating checkout session:", error);
+    res.status(500).json({ error: "Error creating checkout session" });
   }
 }
 
-// Function to save user data only when successful payment
-async function handleSuccessfulPayment(formData) {
-  // console.log("formData from saveUser():", formData);
+// Handle Stripe webhook
+async function handleWebhook(req, res) {
+  const sig = req.headers["stripe-signature"];
+  let event;
+
   try {
-    // Save user information
-    await userModel.saveUser(formData);
-
-    // Save registration information
-    await registrationsModel.saveRegistration(formData);
-  } catch (error) {
-    console.error("❌ Error saving user information:", error);
-    throw new Error("Error saving user information");
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
   }
+
+  console.log("Event type: ", event.type);
+  if (event.type === "checkout.session.completed") {
+    try {
+      const session = event.data.object;
+      const formData = session.metadata; // Access metadata
+
+      // Save user information to the database
+      await userModel.saveUser(formData);
+
+      console.log("✅ Checkout session completed!");
+    } catch (error) {
+      console.error("Error saving user information to the database:", error);
+      res.status(500).send("Error handling successful payment");
+      return;
+    }
+  }
+
+  res.send();
 }
 
-module.exports = { fetchTickets, handleSuccessfulPayment };
+module.exports = {
+  createCheckoutSession,
+  handleWebhook,
+};

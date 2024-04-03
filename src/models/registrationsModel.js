@@ -32,6 +32,9 @@ async function saveRegistration(formData) {
     await pool.query(query, values);
 
     console.log("✅ Registration information saved successfully!");
+
+    // Return the generated registrationId
+    return registrationId;
   } catch (error) {
     console.error(
       "❌ Error al guardar la información de registro en la base de datos:",
