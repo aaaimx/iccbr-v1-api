@@ -14,6 +14,9 @@ async function saveRegistration(formData) {
     // Gets the current date and time
     const currentDate = new Date();
 
+    // Determines if registration is paid based on payment method
+    const isPaid = paymentMethod === "stripe";
+
     // Insert registration data into "registrations" table
     const query = `
       INSERT INTO registrations (registration_id, email, payment_method, registration_date, payment_date, is_paid)
@@ -24,8 +27,8 @@ async function saveRegistration(formData) {
       email,
       paymentMethod,
       currentDate, // Use the current date and time for registration_date
-      currentDate, // Use the current date and time for payment_date
-      true,
+      isPaid ? currentDate : null, // Use the current date and time if paid, otherwise null
+      isPaid,
     ];
 
     // console.log("registrationId from registrationsModel: ", registrationId);
