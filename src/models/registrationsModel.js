@@ -28,13 +28,15 @@ async function saveRegistration(formData) {
       true,
     ];
 
+    // console.log("registrationId from registrationsModel: ", registrationId);
+
     // Execute the SQL query with the provided values
     await pool.query(query, values);
 
     console.log("✅ Registration information saved successfully!");
 
     // Return the generated registrationId
-    return registrationId;
+    return { registrationId, formData };
   } catch (error) {
     console.error(
       "❌ Error al guardar la información de registro en la base de datos:",

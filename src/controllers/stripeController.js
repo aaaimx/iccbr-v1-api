@@ -10,32 +10,31 @@ const registrationTicketsModel = require("../models/registrationTicketsModel.js"
 // Function to create a new checkout session
 async function createCheckoutSession(req, res) {
   const { tickets, formData } = req.body;
-  // console.log("formData of /create-checkout-session", formData);
-  // console.log("tickets of /create-checkout-session", tickets);
   console.log("✅ Checkout session created!");
 
   try {
+    const lineItems = tickets.map((ticket) => ({
+      price_data: {
+        currency: ticket.currency,
+        product_data: {
+          name: ticket.name,
+          description: ticket.description || "No description available",
+        },
+        unit_amount: ticket.price * 100,
+      },
+      quantity: ticket.quantity,
+    }));
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      line_items: tickets.map((ticket) => ({
-        price_data: {
-          currency: ticket.currency,
-          product_data: {
-            name: ticket.name,
-            description: ticket.description || "No description available",
-          },
-          unit_amount: ticket.price * 100,
-        },
-        quantity: ticket.quantity,
-      })),
+      line_items: lineItems,
       mode: "payment",
       success_url: "http://localhost:4321/success",
       cancel_url: "http://localhost:4321/cancel",
-      metadata: formData,
-      /*metadata: {
+      metadata: {
         formData: JSON.stringify(formData),
-        tickets: tickets.map((ticket) => ticket.id).join(","),
-      },*/
+        tickets: JSON.stringify(tickets), // Ensure tickets are properly formatted
+      },
     });
 
     res.json({ url: session.url, sessionId: session.id, formData });
@@ -60,13 +59,26 @@ async function handleWebhook(req, res) {
   if (event.type === "checkout.session.completed") {
     try {
       const session = event.data.object;
-      const formData = session.metadata; // Access metadata
+      const dataFrom = JSON.parse(session.metadata.formData);
+      const tickets = JSON.parse(session.metadata.tickets);
+
+      // console.log("Tickets recieved from checkout session:", tickets);
 
       // Save user information
-      await userModel.saveUser(formData);
+      await userModel.saveUser(dataFrom);
 
       // Save registration information
-      await registrationsModel.saveRegistration(formData);
+      const { registrationId } = await registrationsModel.saveRegistration(
+        dataFrom
+      );
+
+      // Save tickets information
+      for (const ticket of tickets) {
+        await registrationTicketsModel.saveRegistrationTicket(
+          registrationId,
+          ticket
+        );
+      }
 
       console.log("✅ Checkout session completed!");
     } catch (error) {
