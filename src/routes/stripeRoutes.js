@@ -2,8 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const router = express.Router();
 const stripeController = require("../controllers/stripeController");
-const endpointSecret = process.env.STRIPE_SECRET_ENDPOINT;
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // Middleware to parse request body as JSON
 const jsonParser = bodyParser.json();

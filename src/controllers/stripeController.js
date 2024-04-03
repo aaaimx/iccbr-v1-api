@@ -10,7 +10,7 @@ const registrationTicketsModel = require("../models/registrationTicketsModel.js"
 // Function to create a new checkout session
 async function createCheckoutSession(req, res) {
   const { tickets, formData } = req.body;
-  console.log("formData of /create-checkout-session", formData);
+  // console.log("formData of /create-checkout-session", formData);
   // console.log("tickets of /create-checkout-session", tickets);
   console.log("✅ Checkout session created!");
 
@@ -57,18 +57,20 @@ async function handleWebhook(req, res) {
     return;
   }
 
-  console.log("Event type: ", event.type);
   if (event.type === "checkout.session.completed") {
     try {
       const session = event.data.object;
       const formData = session.metadata; // Access metadata
 
-      // Save user information to the database
+      // Save user information
       await userModel.saveUser(formData);
+
+      // Save registration information
+      await registrationsModel.saveRegistration(formData);
 
       console.log("✅ Checkout session completed!");
     } catch (error) {
-      console.error("Error saving user information to the database:", error);
+      console.error("Error saving information to the database:", error);
       res.status(500).send("Error handling successful payment");
       return;
     }
