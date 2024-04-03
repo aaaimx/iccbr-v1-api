@@ -59,17 +59,17 @@ async function handleWebhook(req, res) {
   if (event.type === "checkout.session.completed") {
     try {
       const session = event.data.object;
-      const dataFrom = JSON.parse(session.metadata.formData);
+      const formData = JSON.parse(session.metadata.formData);
       const tickets = JSON.parse(session.metadata.tickets);
 
       // console.log("Tickets recieved from checkout session:", tickets);
 
       // Save user information
-      await userModel.saveUser(dataFrom);
+      await userModel.saveUser(formData);
 
       // Save registration information
       const { registrationId } = await registrationsModel.saveRegistration(
-        dataFrom
+        formData
       );
 
       // Save tickets information
