@@ -1,3 +1,6 @@
+// Nodemailer
+const sendEmail = require("../controllers/nodemailerController.js");
+
 // Models
 const userModel = require("../models/usersModel.js");
 const registrationsModel = require("../models/registrationsModel.js");
@@ -24,8 +27,8 @@ async function saveRegistrationData(req, res) {
       );
     }
 
-    console.log("✅ Registration data saved to the database!");
-    res.status(200).send("Registration data saved successfully");
+    // Send email registration information
+    await sendEmail.sendRegistrationEmail(formData, tickets, registrationId);
   } catch (error) {
     console.error("Error saving registration data to the database:", error);
     res.status(500).send("Error saving registration data to the database");

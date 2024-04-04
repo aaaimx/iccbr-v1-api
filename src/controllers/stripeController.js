@@ -2,6 +2,9 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_SECRET_ENDPOINT;
 
+// Nodemailer
+const sendEmail = require("../controllers/nodemailerController.js");
+
 // Models
 const userModel = require("../models/usersModel.js");
 const registrationsModel = require("../models/registrationsModel.js");
@@ -79,6 +82,9 @@ async function handleWebhook(req, res) {
           ticket
         );
       }
+
+      // Send email registration information
+      await sendEmail.sendRegistrationEmail(formData, tickets, registrationId);
 
       console.log("✅ Checkout session completed!");
     } catch (error) {
