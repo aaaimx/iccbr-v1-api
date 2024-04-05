@@ -1,61 +1,67 @@
-## Acceso al servidor remóto de AWS (EC2)
+## Access to remote AWS server (EC2)
 
-El servidor para los procesos del Back-End está alojado en AWS, para poder acceder se recomienda usar el protocólo SSH, sigue los pasos para lograrlo:
+The server for the Back-End processes is hosted on AWS, to access it it is recommended to use the SSH protocol, follow the steps to achieve this:
 
-1. Solicitar la **Key pair assigned at launch** al administrador del proyecto, con esta se tendrá el acceso al servidor EC2.
+1. Request the **Key pair assigned at launch** from the project administrator, with this you will have access to the EC2 server.
 
 > [!TIP]
-> Si prefieres crear tu propia key puedes seguir estos pasos:
->
-> 1. Se necesita de una Key pair assigned at launch, para ello debes solicitar las credenciales de la cuenta principal de AWS, una vez accediendo ir a EC2 > Instances y aparecerán las instancias creadas hasta el momento, donde está alojado el servidor es el que tiene el nombre de **iccbr-2024**, acceder a esta instancia.
->
-> 2. Se mostrarán todos los detalles del servidor, como la IP pública, privada, etc. Haciendo un poco de scroll aparecerá una opción como esta **Key pair assigned at launch** con el nombre **iccbr-key**, acceder a esta key.
->
-> 3. Dar click en el botón **Create Key pair** y seguir los pasos, una vez se tega descargado guardar en una carpeta, de preferencia donde se tengan los dos repositorios locales (Front-End y Back-End).
+> If you prefer to create your own key you can follow these steps:
 
-3. Una vez tengamos la key pair en nuestra carpeta, accederemos desde la terminal hasta la ubicación donde esta dicha key pair.
+> 1. A Key pair assigned at launch is required, for this you must request the credentials of the main AWS account, once accessed go to EC2 > Instances and the instances created so far will appear, where the server is hosted is the one with the name of **iccbr-2024**, access this instance.
 
-4. Escribir el siguiente comando para acceder de forma remota:
+> 2. All the details of the server such as public IP, private IP, etc. will be displayed. Scrolling a little, an option like this **Key pair assigned at launch** will appear with the name **iccbr-key**, access this key.
+
+> 3. Click on the **Create Key pair** button and follow the steps, once downloaded save in a folder, preferably where you have the two local repositories (Front-End and Back-End).
+
+2. Once we have the key pair in our folder, we will access from the terminal to the location where said key pair is.
+
+3. Write the following command to access remotely:
 
 ```
 ssh ubuntu@public-IPv4 -i iccbr-key.pem
 ```
-> [!TIP]
-> En vez de poner **public-IPv4** recuerda colocar la IPv4 pública que nos proporciona el EC2.
 
-Listo, ya accedimos al servidor EC2 de AWS para este proyecto, ahora podras visualizar el repositorio del Back-End siguiendo estos pasos:
+> [!IMPORTANT]
+> Instead of putting **public-IPv4** remember to put the public IPv4 that EC2 provides us.
 
-1. Accede al repositorio local:
+Ready, we have already accessed the AWS EC2 server for this project, now you can view the Back-End repository by following these steps:
+
+1. Access the repository:
 
 ```
 cd main
 ls
 ```
 
-2. El comando **ls** mostrará los diferentes repositorios de los proyectos existentes (en caso de haberlos), para acceder al de este proyecto ejecuta el siguiente comando:
+2. The **ls** command will show the different repositories of the existing projects (if any), to access this project's repository run the following command:
 
 ```
 cd iccbr-v1-api
 ```
 
-El servidor debe estar en ejecución, para comprobar esto puedes ejecutar el siguiente comando:
+The server must be running, to check this you can run the following command:
 
 ```
 ps aux | grep npm
 ```
-> [!TIP]
-> El comando **ps aux** muestra todos los procesos en ejecución en el sistema junto con información detallada sobre ellos. El comando **grep npm** filtra la salida de ps aux, mostrando solo las líneas que contienen la palabra "npm". En resumen, este comando muestra los procesos relacionados con npm que están en ejecución en el sistema.
 
-Debe mostrarse algo como esto:
+> [!TIP]
+> The **ps aux** command displays all the running processes on the system along with detailed information about them. The **grep npm** command filters the output of ps aux, displaying only the lines that contain the word "npm". In short, this command shows the npm related processes that are running on the system.
+
+It should display something like this:
+
 ```
 ubuntu     11044  7.4  6.6 1100996 64536 pts/0   Sl   04:49   0:00 npm start
 ```
 
-En caso de que no se muestre ningun proceso, entonces puedes inicializar el servidor remoto con el siguiente comando:
+In case no process is shown, then you can initialize the remote server with the following command:
+
 ```
 npm start &
 ```
-> [!TIP]
-> Este comando ejecuta el script de inicio definido en el archivo **package.json** de un proyecto de **Node.js** utilizando npm. La parte npm start indica que se debe ejecutar el script de inicio definido en la sección "scripts" del archivo package.json, usualmente utilizado para iniciar la aplicación. El **&** al final del comando ejecuta el script en segundo plano, permitiendo que el terminal esté disponible para otras operaciones mientras la aplicación se ejecuta.
 
-Si vuelves a ejecutar el comando para ver los procesos debería aparecer en ejecución.
+> [!TIP]
+> This command runs the startup script defined in the **package.json** file of a **Node.js** project using npm. The npm start part indicates to run the startup script defined in the "scripts" section of the package.json file, usually used to start the application. The **&** at the end of the command runs the script in the background, allowing the terminal to be available for other operations while the application is running.
+
+If you run the command again to see the processes it should appear running.
+
