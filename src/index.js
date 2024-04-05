@@ -6,11 +6,12 @@ const app = express();
 const stripeRoutes = require("./routes/stripeRoutes");
 const ticketsRoutes = require("./routes/ticketsRoutes");
 const bankTransferRoutes = require("./routes/bankTransferRoutes");
+const { clientUrl } = require("./config/config.js");
 
 // Enable CORS for all requests
 app.use(
   cors({
-    origin: "https://sfw-division.com",
+    origin: clientUrl,
   })
 );
 

@@ -10,6 +10,11 @@ const userModel = require("../models/usersModel.js");
 const registrationsModel = require("../models/registrationsModel.js");
 const registrationTicketsModel = require("../models/registrationTicketsModel.js");
 
+// Destination Urls
+const { clientUrl } = require("../config/config.js");
+const successUrl = `${clientUrl}/success`;
+const cancelUrl = `${clientUrl}/success`;
+
 // Function to create a new checkout session
 async function createCheckoutSession(req, res) {
   const { tickets, formData } = req.body;
@@ -32,8 +37,8 @@ async function createCheckoutSession(req, res) {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: "http://localhost:4321/success",
-      cancel_url: "http://localhost:4321/cancel",
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         formData: JSON.stringify(formData),
         tickets: JSON.stringify(tickets), // Ensure tickets are properly formatted
