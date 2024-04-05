@@ -6,11 +6,11 @@ The server for the Back-End processes is hosted on AWS, to access it it is recom
 
 > [!TIP]
 > If you prefer to create your own key you can follow these steps:
-
+>
 > 1. A Key pair assigned at launch is required, for this you must request the credentials of the main AWS account, once accessed go to EC2 > Instances and the instances created so far will appear, where the server is hosted is the one with the name of **iccbr-2024**, access this instance.
-
+>
 > 2. All the details of the server such as public IP, private IP, etc. will be displayed. Scrolling a little, an option like this **Key pair assigned at launch** will appear with the name **iccbr-key**, access this key.
-
+>
 > 3. Click on the **Create Key pair** button and follow the steps, once downloaded save in a folder, preferably where you have the two local repositories (Front-End and Back-End).
 
 2. Once we have the key pair in our folder, we will access from the terminal to the location where said key pair is.
@@ -64,4 +64,3 @@ npm start &
 > This command runs the startup script defined in the **package.json** file of a **Node.js** project using npm. The npm start part indicates to run the startup script defined in the "scripts" section of the package.json file, usually used to start the application. The **&** at the end of the command runs the script in the background, allowing the terminal to be available for other operations while the application is running.
 
 If you run the command again to see the processes it should appear running.
-

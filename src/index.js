@@ -14,7 +14,7 @@ const bankTransferRoutes = require("./routes/bankTransferRoutes");
 // Enable CORS for all requests
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGIN || "http://localhost:4321",
+    origin: "https://sfw-division.com",
   })
 );
 
