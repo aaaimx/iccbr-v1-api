@@ -19,7 +19,5 @@ app.use("/api", stripeRoutes);
 app.use("/api", ticketsRoutes);
 app.use("/api", bankTransferRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+const PORT = 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port: ${PORT}`));

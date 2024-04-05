@@ -73,6 +73,8 @@ function buildMailOptions(
       <h2><strong>Total amount:</strong> $${totalCostSum}</h2>
 
       ${paymentInfoHTML}
+
+      <p>If you have any questions or problems with your registration, contact this email: <a href="mailto:registration@iccbr2024.org">registration@iccbr2024.org</a></p>
     `,
   };
 }
