@@ -1,3 +1,3 @@
-const clientUrl = "https://sfw-division.com/";
+const clientUrl = "https://sfw-division.com";
 
 module.exports = { clientUrl };
