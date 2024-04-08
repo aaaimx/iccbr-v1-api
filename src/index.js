@@ -22,5 +22,5 @@ app.use("/api", stripeRoutes);
 app.use("/api", ticketsRoutes);
 app.use("/api", bankTransferRoutes);
 
-const PORT = 3000;
+const PORT = 443;
 app.listen(PORT, () => console.log(`🚀 Server running on port: ${PORT}`));
