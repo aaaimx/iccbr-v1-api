@@ -44,15 +44,13 @@ git clone https://github.com/aaaimx/iccbr-v1-api.git
 └── 📦 pnpm-lock.yaml
 ```
 
-> [!WARNING]
-> **Note:** Consider that .env and .env.local files should only be used locally.
+> [!WARNING] > **Note:** Consider that .env and .env.local files should only be used locally.
 
 ## Development and production environment.
 
 The repository has three branches; **prod**, **dev** and **hot-fixes**;
 
-> [!TIP]
-> **Branches:** These are parallel versions of the code base that allow working on different functionalities or bug fixes independently. In this case, three main branches are mentioned:
+> [!TIP] > **Branches:** These are parallel versions of the code base that allow working on different functionalities or bug fixes independently. In this case, three main branches are mentioned:
 
 **🚀 prod (short for "production"):** This branch typically contains the stable version of the code that is ready to be deployed to a production environment, that is, the environment where end users interact with the live application.
 
@@ -60,9 +58,8 @@ The repository has three branches; **prod**, **dev** and **hot-fixes**;
 
 **🔥 hot-fixes (short for "quick fixes"):** This branch is used to fix critical or urgent bugs in the production version without having to wait for the next planned release. Hot-fixes are deployed quickly and applied directly to the production branch to fix urgent issues.
 
-> [!WARNING]
-> **Note:** Make sure you don't make changes to the prod branch, much less make unauthorized merges to avoid problems.
+> [!WARNING] > **Note:** Make sure you don't make changes to the prod branch, much less make unauthorized merges to avoid problems.
 
 ## Database
 
-🗄️ Consult the database structure and E-R diagram for a better understanding:
+🗄️ Consult the database structure and E-R diagram for a better understanding: [ICCBR_DB](https://app.eraser.io/workspace/HZNS4aMUDMU1zqRXfrKD?origin=share)
