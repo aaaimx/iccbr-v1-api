@@ -1,3 +1,3 @@
-const clientUrl = "http://localhost:4321";
+const clientUrl = "https://sfw-division.com/";
 
 module.exports = { clientUrl };
