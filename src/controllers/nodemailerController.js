@@ -1,94 +1,207 @@
 // Nodemailer transporter
 const createTransporter = require("../config/nodemailer.js");
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
 
-// Function to build the HTML of the ticket table
-function buildTicketsTableHTML(tickets) {
-  let ticketsTableHTML =
-    "<table border='1'><tr><th>Ticket</th><th>Description</th><th>Quantity</th><th>Price</th><th>Total Cost</th></tr>";
-  let totalCostSum = 0;
+// Logo
+const logoPath = "public/img/icono.png";
+const logoBuffer = fs.readFileSync(logoPath);
+const logoWidth = 120;
+const logoX = 72;
+const logoY = 50;
+
+// Bank account information
+const bankAccount = "CITIBANAMEX";
+const accountAddress = "SUCURSAL 640, TAMULTE, TABASCO, CENTRO. 86153.";
+const accountHolder = "JARKOL TECHNOLOGIES S.A. DE C.V.";
+const mexicanAccountNumber = "8098363741";
+const internationalAccountNumber = "06409400254";
+const rfc = "JTE17072072A";
+const mexicanKey = "002790701123141039";
+const internationalKey = "002790064094002546";
+const swiftCode = "BNMXMXMM";
+
+function buildPDFContent(formData, tickets, registrationId) {
+  const doc = new PDFDocument();
+  const chunks = [];
+
+  // Header
+  doc.image(logoBuffer, logoX, logoY, { width: logoWidth });
+
+  doc.fontSize(26).font("Helvetica-Bold").text("International Conference", {
+    align: "right",
+    indent: 100,
+  });
+  doc.font("Helvetica-Bold").text("on Case-Based Reasoning", {
+    align: "right",
+    indent: 100,
+  });
+  doc
+    .fontSize(14)
+    .font("Helvetica-Bold")
+    .text("July 1st - 4th, 2024. Merida, Yucatan, Mexico", {
+      align: "right",
+    });
+  doc.moveDown();
+
+  doc
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .text(`Registration ID: ${registrationId}`, { align: "right" });
+  doc.moveDown();
+  doc.moveDown();
+
+  // Main information
+  doc.fontSize(14).font("Helvetica-Bold").text("User Information");
+
+  // Separator
+  doc.moveTo(72, doc.y).lineTo(522, doc.y).lineWidth(1).stroke();
+  doc.moveDown();
+
+  doc.fontSize(12).font("Helvetica").text(`First Name: ${formData.firstName}`);
+  doc.text(`Last Name: ${formData.lastName}`);
+  doc.text(`Phone Number: ${formData.mobileNumber}`);
+  doc.text(`Email: ${formData.email}`);
+  doc.text(`Country: ${formData.country}`);
+  doc.text(`Institution: ${formData.institution}`);
+  doc.text(`Address: ${formData.address}`);
+  doc.text(`Payment Method: ${formData.paymentMethod}`);
+  const paymentStatus = formData.paymentMethod === "stripe" ? "Paid" : "Unpaid";
+  doc.text(`Payment Status: ${paymentStatus}`);
+  doc.moveDown();
+
+  // Bank Transfer information
+  if (formData.paymentMethod !== "stripe") {
+    // MXN Bank Transfer
+    doc
+      .fontSize(14)
+      .font("Helvetica-Bold")
+      .text("National Bank Transfer Information (MXN)");
+
+    // Separator
+    doc.moveTo(72, doc.y).lineTo(522, doc.y).lineWidth(1).stroke();
+    doc.moveDown();
+
+    doc
+      .fontSize(8)
+      .font("Helvetica")
+      .text(
+        "Please note that these references are only valid for local transfers in MXN"
+      );
+    doc.moveDown();
+
+    doc.fontSize(12).text(`Banco: ${bankAccount}`);
+    doc.text(`Dirección: ${accountAddress}`);
+    doc.text(`Nombre de Cuenta: ${accountHolder}`);
+    doc.text(`Número de Cuenta: ${mexicanAccountNumber}`);
+    doc.text(`Concepto: ICCBR 2024 - Registro ${registrationId}`);
+    doc.text(`RFC: ${rfc}`);
+    doc.text(`Clabe: ${mexicanKey}`);
+    doc.moveDown();
+
+    // International Bank Transfer
+    doc
+      .fontSize(14)
+      .font("Helvetica-Bold")
+      .text("International Wire Transfer (USD)");
+
+    // Separator
+    doc.moveTo(72, doc.y).lineTo(522, doc.y).lineWidth(1).stroke();
+    doc.moveDown();
+
+    doc
+      .fontSize(8)
+      .font("Helvetica")
+      .text(
+        "Please note that these references are only valid for international wire transfers in USD"
+      );
+    doc.moveDown();
+
+    doc.fontSize(12).text(`Bank: ${bankAccount}`);
+    doc.text(`Postal Address: ${accountAddress}`);
+    doc.text(`Account Holder: ${accountHolder}`);
+    doc.text(`Account Number: ${internationalAccountNumber}`);
+    doc.text(`Concept: ICCBR 2024 - Registro ${registrationId}`);
+    doc.text(`RFC: ${rfc}`);
+    doc.text(`Key: ${internationalKey}`);
+    doc.text(`SWIFT Code/BIC: ${swiftCode}`);
+    doc.moveDown();
+
+    // Footer
+    doc
+      .fontSize(12)
+      .font("Helvetica-Bold")
+      .text(
+        "Once the transfer has been made, please send the receipt and indicating if you require an invoice to the following email: registration@iccbr2024.org"
+      );
+    doc.moveDown();
+  }
+
+  // Tickets information
+  doc.fontSize(14).font("Helvetica-Bold").text("Tickets Information");
+
+  // Separator
+  doc.moveTo(72, doc.y).lineTo(522, doc.y).lineWidth(1).stroke();
+  doc.moveDown();
 
   tickets.forEach((ticket) => {
+    doc.fontSize(12).font("Helvetica").text(`Ticket: ${ticket.name}`);
+    doc.text(`Description: ${ticket.description}`);
+    doc.text(`Quantity: ${ticket.quantity}`);
+    doc.text(`Unit price: $${ticket.price}`);
     const totalCost = ticket.quantity * ticket.price;
-    totalCostSum += totalCost;
+    doc.text(`Total Cost: $${totalCost}`);
+    doc.moveDown();
+  });
+  const totalCostSum = tickets.reduce(
+    (acc, ticket) => acc + ticket.quantity * ticket.price,
+    0
+  );
+  doc
+    .fontSize(14)
+    .font("Helvetica-Bold")
+    .text(`Total amount to pay: $${totalCostSum}`);
+  doc.moveDown();
 
-    ticketsTableHTML += `<tr><td>${ticket.name}</td><td>${ticket.description}</td><td>${ticket.quantity}</td><td>${ticket.price}</td><td>${totalCost}</td></tr>`;
+  // Handle the output to PDF
+  doc.on("data", (chunk) => {
+    chunks.push(chunk);
   });
 
-  ticketsTableHTML += "</table>";
+  doc.on("end", () => {
+    const pdfBuffer = Buffer.concat(chunks);
+    buildMailOptions(formData, pdfBuffer, registrationId);
+  });
 
-  return { ticketsTableHTML, totalCostSum };
-}
-
-// Function to build the HTML of user information
-function buildUserInfoHTML(formData, registrationId) {
-  // Validate payment status
-  const paymentStatus = formData.paymentMethod === "stripe" ? "Paid" : "Unpaid";
-
-  return `
-    <p><strong>First Name:</strong> ${formData.firstName}</p>
-    <p><strong>Last Name:</strong> ${formData.lastName}</p>
-    <p><strong>Phone Number:</strong> ${formData.mobileNumber}</p>
-    <p><strong>Email:</strong> ${formData.email}</p>
-    <p><strong>Country:</strong> ${formData.country}</p>
-    <p><strong>Institution:</strong> ${formData.institution}</p>
-    <p><strong>Address:</strong> ${formData.address}</p>
-    <p><strong>Payment Method:</strong> ${formData.paymentMethod}</p>
-    <p><strong>Payment Status:</strong> ${paymentStatus}</p>
-  `.trim();
+  doc.end();
 }
 
 // Function to build mail options
-function buildMailOptions(
-  formData,
-  ticketsTableHTML,
-  totalCostSum,
-  registrationId
-) {
-  let paymentInfoHTML = ""; // Initialize an empty string to store the payment information
-
-  // If the payment method is not "stripe", we build the payment information section
-  if (formData.paymentMethod !== "stripe") {
-    paymentInfoHTML = `
-      <h2><strong>To make the payment you can do it to this account:</strong></h2>
-      <p><strong>Name account:</strong> Tec Mérida</p>
-      <p><strong>Concept:</strong> 00000</p>
-      <p><strong>Reference:</strong> 00000000</p>
-      <p>Once the transfer has been made, please send the receipt and indicating if you require an invoice to the following email: <a href="mailto:registration@iccbr2024.org">registration@iccbr2024.org</a></p>
-    `.trim();
-  }
-
-  return {
+function buildMailOptions(formData, pdfBuffer, registrationId) {
+  const mailOptions = {
     from: process.env.NM_USER,
     to: formData.email,
     subject: "ICCBR 2024 - Successful Registration",
+    attachments: [
+      {
+        filename: `registration_${registrationId}.pdf`,
+        content: pdfBuffer,
+      },
+    ],
     html: `
       <h1>Your registration has been successful!</h1>
 
-      <h2><strong>Registration ID:</strong> ${registrationId}</h2>
-
-      ${buildUserInfoHTML(formData)}
-
-      <h2>Tickets information</h2>
-      ${ticketsTableHTML}
-      <h2><strong>Total amount:</strong> $${totalCostSum}</h2>
-
-      ${paymentInfoHTML}
+      <p>Please, find attached your registation invoice for ICCBR 2024.</p>
 
       <p>If you have any questions or problems with your registration, contact this email: <a href="mailto:registration@iccbr2024.org">registration@iccbr2024.org</a></p>
     `,
   };
+
+  sendEmail(mailOptions);
 }
 
-// Feature to send registration email
-async function sendRegistrationEmail(formData, tickets, registrationId) {
-  const { ticketsTableHTML, totalCostSum } = buildTicketsTableHTML(tickets);
-  const mailOptions = buildMailOptions(
-    formData,
-    ticketsTableHTML,
-    totalCostSum,
-    registrationId
-  );
-
+// Function to send registration email
+async function sendEmail(mailOptions) {
   try {
     const transporter = createTransporter();
     await transporter.sendMail(mailOptions);
@@ -97,6 +210,11 @@ async function sendRegistrationEmail(formData, tickets, registrationId) {
     console.error("Error sending registration email:", error);
     throw new Error("Failed to send registration email");
   }
+}
+
+// Function to recieve all information parameters
+async function sendRegistrationEmail(formData, tickets, registrationId) {
+  buildPDFContent(formData, tickets, registrationId);
 }
 
 module.exports = {
