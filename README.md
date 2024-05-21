@@ -60,7 +60,8 @@ The repository has three branches; **prod**, **dev** and **hot-fixes**;
 
 **🔥 hot-fixes (short for "quick fixes"):** This branch is used to fix critical or urgent bugs in the production version without having to wait for the next planned release. Hot-fixes are deployed quickly and applied directly to the production branch to fix urgent issues.
 
-> [!WARNING] > **Note:** Make sure you don't make changes to the prod branch, much less make unauthorized merges to avoid problems.
+> [!WARNING]
+> **Note:** Make sure you don't make changes to the prod branch, much less make unauthorized merges to avoid problems.
 
 ## Database
 
