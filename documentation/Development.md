@@ -9,7 +9,7 @@ The platform uses the Stripe API for the payment gateway, the system only allows
 
 2. In the image you can see that there are two options; **Hosted endpoints** and the **Local listeners**, to configure your webhook locally you will click on the button that says **"+ Add local listener"**
 
-<img src="../assets/webhook_1.jpg" alt="Screen of Webhook settings"> 
+<img src="documentation/assets/webhook_1.jpg" alt="Screen of Webhook settings"> 
 
 3. You will have to follow the steps in the Stripe documentation, download and configure the **Stripe CLI**:
 
